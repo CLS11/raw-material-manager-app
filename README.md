@@ -15,10 +15,15 @@ A Flutter application for managing material inventory with Google Sheets sync an
 ## FEATURES
 
 1. Inventory Management:
+![Image 1](https://github.com/user-attachments/assets/0cca9316-b0e8-46d3-abdd-c8ba9277feab)
+![Image 2](https://github.com/user-attachments/assets/a42e7778-09ad-44bf-98bd-fbfde0c322c8)
+
 
 Add and manage materials, each with a quantity and a threshold.
 
 2. Manufacturing Logs:
+![Image 3](https://github.com/user-attachments/assets/5111d784-adde-4abb-bc14-b9ff41b9f263)
+
 
 Simulate product manufacturing and update material quantities accordingly.
 
@@ -31,6 +36,8 @@ Uses Hive for local storage.
 Efficient state management using flutter_bloc.
 
 5. Bottom Navigation:
+   ![Image 4](https://github.com/user-attachments/assets/be70f75f-33f9-4b25-9045-58d3647665f0)
+
 
 Seamless navigation between Inventory and Logs screens.
 
