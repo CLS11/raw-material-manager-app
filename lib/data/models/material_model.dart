@@ -10,6 +10,14 @@ class MaterialModel extends HiveObject {
     required this.currentQuantity,
     required this.thresholdQuantity,
   });
+
+  factory MaterialModel.fromJson(Map<String, dynamic> json) {
+    return MaterialModel(
+      name: json['name'] as String,
+      currentQuantity: (json['currentQuantity'] as num).toDouble(), 
+      thresholdQuantity:  (json['thresholdQuantity'] as num).toDouble(),
+    );
+  }
   @HiveField(0)
   final String name;
 
@@ -18,6 +26,14 @@ class MaterialModel extends HiveObject {
 
   @HiveField(2)
   final double thresholdQuantity;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'currentQuantity': currentQuantity,
+      'thresholdQuantity': thresholdQuantity,
+    };
+  }
 
   MaterialModel copyWith({
     String? name,
