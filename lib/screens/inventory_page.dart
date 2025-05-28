@@ -11,9 +11,9 @@ class InventoryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Inventory Management'
-          ),
+          'Inventory Management',
         ),
+      ),
       body: BlocBuilder<InventoryCubit, List<MaterialModel>>(
         builder: (context, materials) {
           if (materials.isEmpty) {
@@ -39,17 +39,20 @@ class InventoryPage extends StatelessWidget {
                   children: [
                     if (isLowStock)
                       const Icon(
-                        Icons.warning, 
+                        Icons.warning,
                         color: Colors.red,
                       ),
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () => _showAddEditDialog(
-                        context, material: mat,
-                        ),
+                        context, 
+                        material: mat,
+                      ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete),
+                      icon: const Icon(
+                        Icons.delete,
+                      ),
                       onPressed: () {
                         context.read<InventoryCubit>().deleteMaterial(mat.name);
                       },
@@ -70,87 +73,135 @@ class InventoryPage extends StatelessWidget {
     );
   }
 
-  void _showAddEditDialog(BuildContext context, {MaterialModel? material}) {
+  Future<void> _showAddEditDialog(
+    BuildContext context, 
+    {MaterialModel? material}) async {
     final nameController = TextEditingController(
       text: material?.name ?? ''
     );
-    final qtyController = TextEditingController(
-      text: material?.currentQuantity.toString() ?? ''
+    final quantityController = TextEditingController(
+      text: material?.currentQuantity.toString() ?? '0'
     );
     final thresholdController = TextEditingController(
-      text: material?.thresholdQuantity.toString() ?? ''
+      text: material?.thresholdQuantity.toString() ?? '0'
     );
 
-    showDialog(
+    await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(
-          material == null ? 'Add Material' : 'Edit Material',
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              readOnly: material != null, 
-              decoration: const InputDecoration(
-                labelText: 
-                'Material Name',
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text(material == null ? 'Add Material' : 'Edit Material'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: nameController, 
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                    ),
+                  ),
+                  TextField(
+                    controller: quantityController,
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  TextField(
+                    controller: thresholdController,
+                    decoration: const InputDecoration(
+                      labelText: 'Threshold',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
               ),
             ),
-            TextField(
-              controller: qtyController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 
-                'Current Quantity',
-              ),
-            ),
-            TextField(
-              controller: thresholdController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 
-                'Threshold Quantity',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), 
-            child: const Text(
-              'Cancel',
-              ),
-            ),
-          TextButton(
-            onPressed: () {
-              final name = nameController.text.trim();
-              final qty = double.tryParse(
-                qtyController.text.trim()) ?? 0;
-              final threshold = double.tryParse(
-                thresholdController.text.trim()) ?? 0;
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Cancel',
+                  ),
+                ),
+              ElevatedButton(
+                  onPressed: () {
+                    final name = nameController.text.trim();
+                    final qty = double.tryParse(
+                      quantityController.text
+                    ) ?? -1;
+                    final threshold = double.tryParse(
+                      thresholdController.text
+                    ) ?? -1;
 
-              final newMaterial = MaterialModel(
-                name: name, 
-                currentQuantity: qty, 
-                thresholdQuantity: threshold
-              );
+                    if (name.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Name cannot be empty',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    if (qty < 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Quantity cannot be negative',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    if (threshold < 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Threshold cannot be negative',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
 
-              if (material == null) {
-                context.read<InventoryCubit>().addMaterial(newMaterial);
-              } else {
-                context.read<InventoryCubit>().updateMaterial(name, newMaterial);
-              }
+                    if (material == null) {
+                      context.read<InventoryCubit>().addMaterial(
+                            MaterialModel(
+                              name: name,
+                              currentQuantity: qty,
+                              thresholdQuantity: threshold,
+                            ),
+                          );
+                    } else {
+                      context.read<InventoryCubit>().updateMaterial(
+                            material.name,
+                            material.copyWith(
+                              name: name,
+                              currentQuantity: qty,
+                              thresholdQuantity: threshold,
+                            ),
+                          );
+                    }
 
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Save',
-            ),
-          ),
-        ],
-      ),
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Save',
+                  ),
+                ),
+            ],
+          );
+        });
+      },
     );
+
+    
+    nameController.dispose();
+    quantityController.dispose();
+    thresholdController.dispose();
   }
 }
