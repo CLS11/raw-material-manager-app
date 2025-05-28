@@ -3,8 +3,14 @@ import 'package:materialapp/data/models/composition_model.dart';
 import 'package:materialapp/data/models/material_model.dart';
 
 class HiveService {
-  final Box<MaterialModel> _inventoryBox = Hive.box('inventory');
-  final Box<CompositionModel> _compositionBox = Hive.box('composition');  
+  late final Box<MaterialModel> _inventoryBox;
+  late final Box<CompositionModel> _compositionBox;
+
+  void init() {
+  _inventoryBox = Hive.box('inventory');
+  _compositionBox = Hive.box('composition');
+}
+
 
   //************FOR INVENTORY CUBIT****************
 
